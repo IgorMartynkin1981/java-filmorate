@@ -2,16 +2,12 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.IdSubZeroException;
 import ru.yandex.practicum.filmorate.exception.UserAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.Valid;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
@@ -44,9 +40,14 @@ public class UserController {
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
         log.info("Получен запрос к эндпоинту на изменение данных пользователя: '{}'", user);
-        findMaxId();
-        users.put(user.getId(), user);
-        log.info("Изменения успешно внесены");
+        if (users.containsKey(user.getId())) {
+            users.put(user.getId(), user);
+            log.info("Изменения успешно внесены");
+        } else {
+            createUser(user);
+            log.info("Пользователь не существует: '{}'", user);
+        }
+
         return user;
     }
 
