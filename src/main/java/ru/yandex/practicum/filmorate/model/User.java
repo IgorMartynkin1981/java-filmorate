@@ -11,6 +11,7 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 public class User {
+    @PositiveOrZero(message = "Id должен быть положительным")
     private int id;
     @NotNull
     @NotBlank(message = "Адрес электронной почты не может быть пустым.")
