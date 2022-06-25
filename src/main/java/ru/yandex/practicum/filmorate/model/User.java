@@ -12,10 +12,12 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class User {
     private int id;
+    @NotNull
+    @NotBlank(message = "Адрес электронной почты не может быть пустым.")
     @Email(message = "Email должен быть корректным адресом электронной почты")
     private String email;
     @NotNull
-    @Pattern(regexp = "[a-zA-Z0-9]+", message = "must not contain special characters")
+    @Pattern(regexp = "[a-zA-Z0-9]+", message = "Login может состоять из букв и цифр")
     @NotBlank(message = "Необходимо указать логин")
     private String login;
     private String name;

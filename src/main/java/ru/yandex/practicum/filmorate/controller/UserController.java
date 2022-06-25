@@ -1,27 +1,23 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpRequest;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.InvalidEmailException;
 import ru.yandex.practicum.filmorate.exception.UserAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Collection;
-import java.util.TreeMap;
+import java.util.HashMap;
 
 @RestController
+@Slf4j
 @RequestMapping("/users")
 public class UserController {
-    private final TreeMap<String, User> users = new TreeMap<>((o1, o2) -> {
-        if (o1 == null) {
-            return 1;
-        } else if (o2 == null) {
-            return -1;
-        }
-        return Integer.compare(o1.compareTo(o2), 0);
-    });
+    private final HashMap<String, User> users = new HashMap<>();
+    private int id = 1;
 
     @GetMapping
     public Collection<User> findAll() {
@@ -29,10 +25,9 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> create(@Valid @RequestBody User user) {
-        if (user.getEmail() == null || user.getEmail().isBlank()) {
-            throw new InvalidEmailException("Адрес электронной почты не может быть пустым.");
-        }
+    public User createUser(@Valid @RequestBody User user) {
+        //checkEmail(user);
+        log.info("Получен запрос к эндпоинту на добавление пользователя: " + user);
         if (users.containsKey(user.getEmail())) {
             throw new UserAlreadyExistException("Пользователь с электронной почтой " +
                     user.getEmail() + " уже зарегистрирован.");
@@ -40,22 +35,38 @@ public class UserController {
         if (user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
-        if (!users.isEmpty()) {
-            user.setId(users.get(users.lastKey()).getId());
-        } else {
-            user.setId(1);
-        }
+        findMaxId();
+        user.setId(id);
         users.put(user.getEmail(), user);
-        return ResponseEntity.ok().build();
+        log.info("Пользователь '{}' добавлен", user);
+        id++;
+        return user;
     }
 
     @PutMapping
-    public User put(@Valid @RequestBody User user) {
+    public User updateUser(@Valid @RequestBody User user) {
+        //checkEmail(user);
+        log.info("Получен запрос к эндпоинту на изменение данных пользователя: '{}'", user);
+        users.put(user.getEmail(), user);
+        log.info("Изменения успешно внесены");
+        return user;
+    }
+
+    /*
+    private void checkEmail(User user) {
         if (user.getEmail() == null || user.getEmail().isBlank()) {
             throw new InvalidEmailException("Адрес электронной почты не может быть пустым.");
         }
-        users.put(user.getEmail(), user);
+    }
+    */
 
-        return user;
+    private void findMaxId() {
+        if (!users.isEmpty()) {
+            for (User userIds : users.values()) {
+                if (userIds.getId() >= id) {
+                    id = userIds.getId() + 1;
+                }
+            }
+        }
     }
 }
