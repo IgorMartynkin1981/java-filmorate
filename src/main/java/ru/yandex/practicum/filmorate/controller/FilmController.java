@@ -28,9 +28,11 @@ public class FilmController {
     public Film createFilm(@Valid @RequestBody Film film) {
         log.info("Получен запрос к эндпоинту на добавление пользователя: " + film);
         if (findName(film)) {
+            log.warn("Такой фильм уже существует");
             throw new FilmAlreadyExistException("Такой фильм уже существует");
         }
         if (dateRealiseIsAfter(film)) {
+            log.warn("Дата релиза не может быть меньше 28.12.1895 года");
             throw new FilmDateReleaseIsWrongException("Дата релиза не может быть меньше 28.12.1895 года");
         }
         findMaxId();
@@ -45,15 +47,13 @@ public class FilmController {
     public Film updateFilm(@Valid @RequestBody Film film) {
         log.info("Получен запрос к эндпоинту на изменение данных о фильме: '{}'", film);
         dateRealiseIsAfter(film);
-        films.put(film.getId(), film);
-        log.info("Изменения успешно внесены");
+        if (films.containsKey(film.getId())) {
+            films.put(film.getId(), film);
+            log.info("Изменения успешно внесены");
+        } else {
+            createFilm(film);
+        }
         return film;
-    }
-
-    @DeleteMapping
-    public void deleteFilms() {
-        films.clear();
-        id = 1;
     }
 
     private void findMaxId() {
@@ -67,10 +67,7 @@ public class FilmController {
     }
 
     private boolean dateRealiseIsAfter(Film film) {
-        if (film.getReleaseDate().isBefore(MIN_DATA_RELEASE_DATE)) {
-            return true;
-        }
-        return false;
+        return film.getReleaseDate().isBefore(MIN_DATA_RELEASE_DATE);
     }
 
     private boolean findName(Film film) {

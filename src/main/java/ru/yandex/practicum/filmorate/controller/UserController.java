@@ -47,14 +47,7 @@ public class UserController {
             createUser(user);
             log.info("Пользователь не существует: '{}'", user);
         }
-
         return user;
-    }
-
-    @DeleteMapping
-    public void deleteUsers() {
-        users.clear();
-        id = 1;
     }
 
     private void findMaxId() {

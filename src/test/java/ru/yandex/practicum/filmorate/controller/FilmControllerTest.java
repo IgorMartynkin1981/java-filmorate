@@ -8,9 +8,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import ru.yandex.practicum.filmorate.exception.FilmDateReleaseIsWrongException;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @WebMvcTest(controllers = FilmController.class)
 class FilmControllerTest {
@@ -29,7 +26,6 @@ class FilmControllerTest {
                                 "  \"duration\": 100\n" +
                                 "}"))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
-
     }
 
     @Test
@@ -61,7 +57,7 @@ class FilmControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\n" +
-                                "  \"name\": \"nisi eiusmod\",\n" +
+                                "  \"name\": \"nisi eiusmod2\",\n" +
                                 "  \"description\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
                                                     "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
                                                     "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
@@ -78,7 +74,7 @@ class FilmControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\n" +
-                                "  \"name\": \"nisi eiusmod\",\n" +
+                                "  \"name\": \"nisi eiusmod3\",\n" +
                                 "  \"description\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
                                                     "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
                                                     "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
@@ -96,7 +92,7 @@ class FilmControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\n" +
-                                "  \"name\": \"nisi eiusmod\",\n" +
+                                "  \"name\": \"nisi eiusmod4\",\n" +
                                 "  \"description\": \"adipisicing\",\n" +
                                 "  \"releaseDate\": \"1895-12-28\",\n" +
                                 "  \"duration\": 100\n" +
@@ -105,16 +101,41 @@ class FilmControllerTest {
     }
 
     @Test
-    @DisplayName("Создаём фильм c датой релиза 27 декабря 1895 года, возвращается код 400 или 500")
-    void createFilmReleaseDate27121895Test() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/films")
+    @DisplayName("Обновляем фильм, возвращается код 200")
+    void updateFilmTest() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.put("/films")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\n" +
-                                "  \"name\": \"nisi eiusmod\",\n" +
-                                "  \"description\": \"adipisicing\",\n" +
-                                "  \"releaseDate\": \"1890-12-27\",\n" +
-                                "  \"duration\": 100\n" +
+                                "  \"id\": 1,\n" +
+                                "  \"name\": \"Film Updated\",\n" +
+                                "  \"releaseDate\": \"1989-04-17\",\n" +
+                                "  \"description\": \"New film update decription\",\n" +
+                                "  \"duration\": 190,\n" +
+                                "  \"rate\": 4\n" +
                                 "}"))
-                .andExpect(MockMvcResultMatchers.status().is5xxServerError());
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
+    }
+
+    @Test
+    @DisplayName("Обновляем фильм c отрицательным id, возвращается код код 400 или 500")
+    void updateFilmSubZeroIdTest() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.put("/films")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\n" +
+                                "  \"id\": -1,\n" +
+                                "  \"name\": \"Film Updated\",\n" +
+                                "  \"releaseDate\": \"1989-04-17\",\n" +
+                                "  \"description\": \"New film update decription\",\n" +
+                                "  \"duration\": 190,\n" +
+                                "  \"rate\": 4\n" +
+                                "}"))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Get, возвращает код 200")
+    void addTest() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/films").accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
     }
 }
