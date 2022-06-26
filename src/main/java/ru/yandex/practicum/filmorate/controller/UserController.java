@@ -38,7 +38,10 @@ public class UserController {
     }
 
     @PutMapping
-    public User updateUser(@Valid @RequestBody User user) {
+    public User updateUser(@RequestBody User user) throws Exception {
+        if (user.getId() < 0) {
+            throw new Exception("ID < 0");
+        }
         log.info("Получен запрос к эндпоинту на изменение данных пользователя: '{}'", user);
         if (users.containsKey(user.getId())) {
             users.put(user.getId(), user);

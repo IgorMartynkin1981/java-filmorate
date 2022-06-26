@@ -117,22 +117,6 @@ class FilmControllerTest {
     }
 
     @Test
-    @DisplayName("Обновляем фильм c отрицательным id, возвращается код код 400 или 500")
-    void updateFilmSubZeroIdTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.put("/films")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                "  \"id\": -1,\n" +
-                                "  \"name\": \"Film Updated\",\n" +
-                                "  \"releaseDate\": \"1989-04-17\",\n" +
-                                "  \"description\": \"New film update decription\",\n" +
-                                "  \"duration\": 190,\n" +
-                                "  \"rate\": 4\n" +
-                                "}"))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
-    }
-
-    @Test
     @DisplayName("Get, возвращает код 200")
     void addTest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/films").accept(MediaType.APPLICATION_JSON))

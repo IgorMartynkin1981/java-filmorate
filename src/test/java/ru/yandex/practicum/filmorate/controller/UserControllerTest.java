@@ -149,30 +149,6 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("Обновляю пользователя с пустыми полями, возвращается код 400 или 500")
-    void updateEmptyUserTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.put("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{ }"))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("Обновляю пользователя, возвращается код 400 или 500")
-    void updateUserIdSubZeroTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.put("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                "  \"login\": \"doloreUpdate\",\n" +
-                                "  \"name\": \"est adipisicing\",\n" +
-                                "  \"id\": -1,\n" +
-                                "  \"email\": \"mail@yandex.ru\",\n" +
-                                "  \"birthday\": \"1976-09-20\"\n" +
-                                "}"))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
-    }
-
-    @Test
     @DisplayName("Обновляю пользователя c несуществующем положительным id, возвращается код 200")
     void updateUserNotIdTest() throws Exception {
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.put("/users")
@@ -185,73 +161,6 @@ class UserControllerTest {
                                 "  \"birthday\": \"1976-09-20\"\n" +
                                 "}"))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
-    }
-
-    @Test
-    @DisplayName("Обновляю пользователя ДР > now(), возвращается код 400 или 500")
-    void updateUserDateAfterNowTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.put("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                "  \"login\": \"doloreUpdate\",\n" +
-                                "  \"name\": \"est adipisicing\",\n" +
-                                "  \"id\": 1,\n" +
-                                "  \"email\": \"mail@yandex.ru\",\n" +
-                                "  \"birthday\": \"2222-09-20\"\n" +
-                                "}"))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("Обновляю пользователя с пробелом в login, возвращается код 400 или 500")
-    void updateUserFailLoginTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.put("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                "  \"login\": \"doloreUpdate\",\n" +
-                                "  \"name\": \"est adipisicing\",\n" +
-                                "  \"id\": 20,\n" +
-                                "  \"email\": \"mail20@yandex.ru\",\n" +
-                                "  \"birthday\": \"2002-09-20\"\n" +
-                                "}"))
-                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
-
-        mockMvc.perform(MockMvcRequestBuilders.put("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                "  \"login\": \"dolore Update\",\n" +
-                                "  \"name\": \"est adipisicing\",\n" +
-                                "  \"id\": 20,\n" +
-                                "  \"email\": \"mail20@yandex.ru\",\n" +
-                                "  \"birthday\": \"2002-09-20\"\n" +
-                                "}"))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
-    }
-
-    @Test
-    @DisplayName("Обновляю пользователя с пустым login, возвращается код 400 или 500")
-    void updateUserEmptyLoginTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.put("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                "  \"login\": \"doloreUpdate\",\n" +
-                                "  \"name\": \"est adipisicing\",\n" +
-                                "  \"id\": 30,\n" +
-                                "  \"email\": \"mail30@yandex.ru\",\n" +
-                                "  \"birthday\": \"2002-09-20\"\n" +
-                                "}"))
-                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
-
-        mockMvc.perform(MockMvcRequestBuilders.put("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\n" +
-                                "  \"login\": \" \",\n" +
-                                "  \"name\": \"est adipisicing\",\n" +
-                                "  \"id\": 30,\n" +
-                                "  \"email\": \"mail@30yandex.ru\",\n" +
-                                "  \"birthday\": \"2002-09-20\"\n" +
-                                "}"))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
     @Test

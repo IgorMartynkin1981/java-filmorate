@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.FilmAlreadyExistException;
-import ru.yandex.practicum.filmorate.exception.FilmDateReleaseIsWrongException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import javax.validation.Valid;
@@ -31,9 +30,10 @@ public class FilmController {
             log.warn("Такой фильм уже существует");
             throw new FilmAlreadyExistException("Такой фильм уже существует");
         }
-        if (dateRealiseIsAfter(film)) {
-            log.warn("Дата релиза не может быть меньше 28.12.1895 года");
-            throw new FilmDateReleaseIsWrongException("Дата релиза не может быть меньше 28.12.1895 года");
+        try {
+            dateRealiseIsAfter(film);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
         findMaxId();
         film.setId(id);
@@ -44,7 +44,10 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film updateFilm(@Valid @RequestBody Film film) {
+    public Film updateFilm(@RequestBody Film film) throws Exception {
+        if (film.getId() <0) {
+            throw new Exception("ID < 0");
+        }
         log.info("Получен запрос к эндпоинту на изменение данных о фильме: '{}'", film);
         dateRealiseIsAfter(film);
         if (films.containsKey(film.getId())) {
@@ -66,8 +69,10 @@ public class FilmController {
         }
     }
 
-    private boolean dateRealiseIsAfter(Film film) {
-        return film.getReleaseDate().isBefore(MIN_DATA_RELEASE_DATE);
+    private void dateRealiseIsAfter(Film film) throws Exception {
+        if (film.getReleaseDate().isBefore(MIN_DATA_RELEASE_DATE)) {
+            throw new Exception("Дата не может быть меньше" + MIN_DATA_RELEASE_DATE.toString());
+        }
     }
 
     private boolean findName(Film film) {
