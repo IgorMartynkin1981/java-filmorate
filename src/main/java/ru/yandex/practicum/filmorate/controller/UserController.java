@@ -51,6 +51,12 @@ public class UserController {
         return user;
     }
 
+    @DeleteMapping
+    public void deleteUsers() {
+        users.clear();
+        id = 1;
+    }
+
     private void findMaxId() {
         if (!users.isEmpty()) {
             for (User userIds : users.values()) {

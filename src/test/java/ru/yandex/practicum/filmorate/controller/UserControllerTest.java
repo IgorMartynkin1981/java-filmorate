@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @WebMvcTest(controllers = UserController.class)
@@ -257,6 +258,28 @@ class UserControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("Передача объекта без поля name возвращает код 200")
+    void addTest() throws Exception {
+//        mockMvc.perform(MockMvcRequestBuilders.put("/users")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content("{\n" +
+//                                "  \"login\": \"doloreUpdate\",\n" +
+//                                "  \"name\": \"est adipisicing\",\n" +
+//                                "  \"id\": 30,\n" +
+//                                "  \"email\": \"mail30@yandex.ru\",\n" +
+//                                "  \"birthday\": \"2002-09-20\"\n" +
+//                                "}"))
+//                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/users").accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
+
+
+//                get("/").accept(MediaType.parseMediaType("application/json;charset=UTF-8")))
+//                .andExpect(status().isOk())
+//                .andExpect(content().contentType("application/json"));
+    }
 
     @Test
     @DisplayName("Обновляю пользователя с пустым login, возвращается код 400 или 500")
