@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 @WebMvcTest(controllers = FilmController.class)
 class FilmControllerTest {
     @Autowired
-    MockMvc mockMvc;
+    private MockMvc mockMvc;
 
     @Test
     @DisplayName("Создаём фильм, возвращается код 200")
@@ -59,9 +59,9 @@ class FilmControllerTest {
                         .content("{\n" +
                                 "  \"name\": \"nisi eiusmod2\",\n" +
                                 "  \"description\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
-                                                    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
-                                                    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
-                                                    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n" +
+                                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+                                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+                                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n" +
                                 "  \"releaseDate\": \"1967-03-25\",\n" +
                                 "  \"duration\": 100\n" +
                                 "}"))
@@ -76,10 +76,10 @@ class FilmControllerTest {
                         .content("{\n" +
                                 "  \"name\": \"nisi eiusmod3\",\n" +
                                 "  \"description\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
-                                                    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
-                                                    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
-                                                    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
-                                                    "a\",\n" +
+                                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+                                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+                                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+                                "a\",\n" +
                                 "  \"releaseDate\": \"1967-03-25\",\n" +
                                 "  \"duration\": 100\n" +
                                 "}"))
@@ -88,7 +88,7 @@ class FilmControllerTest {
 
     @Test
     @DisplayName("Создаём фильм c датой релиза 28 декабря 1895 года, возвращается код 200")
-    void createFilmReleaseDate28121895Test() throws Exception{
+    void createFilmReleaseDate28121895Test() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\n" +
@@ -98,6 +98,20 @@ class FilmControllerTest {
                                 "  \"duration\": 100\n" +
                                 "}"))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
+    }
+
+    @Test
+    @DisplayName("Создаём фильм c датой релиза 28 декабря 1895 года, возвращается код 200")
+    void createFilmReleaseDate27121895Test() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/films")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\n" +
+                                "  \"name\": \"nisi eiusmod4\",\n" +
+                                "  \"description\": \"adipisicing\",\n" +
+                                "  \"releaseDate\": \"1895-12-27\",\n" +
+                                "  \"duration\": 100\n" +
+                                "}"))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
     @Test

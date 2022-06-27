@@ -24,12 +24,9 @@ public class UserController {
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
         log.info("Получен запрос к эндпоинту на добавление пользователя: " + user);
-        if (findEmail(user)) {
-            throw new UserAlreadyExistException("Пользователь с электронной почтой " +
-                    user.getEmail() + " уже зарегистрирован.");
-        }
-        isEmptyNameUser(user);
-        findMaxId();
+        findEmailUser(user);
+        createNameUserIsEmpty(user);
+        findMaxIdUsers();
         user.setId(id);
         users.put(user.getId(), user);
         log.info("Пользователь '{}' добавлен", user);
@@ -39,21 +36,21 @@ public class UserController {
 
     @PutMapping
     public User updateUser(@RequestBody User user) throws Exception {
-        if (user.getId() < 0) {
-            throw new Exception("ID < 0");
-        }
         log.info("Получен запрос к эндпоинту на изменение данных пользователя: '{}'", user);
+        if (user.getId() < 0) {
+            log.warn("id пользователя {} не может быть меньше 0", user);
+            throw new Exception();
+        }
         if (users.containsKey(user.getId())) {
             users.put(user.getId(), user);
             log.info("Изменения успешно внесены");
         } else {
             createUser(user);
-            log.info("Пользователь не существует: '{}'", user);
         }
         return user;
     }
 
-    private void findMaxId() {
+    private void findMaxIdUsers() {
         if (!users.isEmpty()) {
             for (User userIds : users.values()) {
                 if (userIds.getId() >= id) {
@@ -63,16 +60,16 @@ public class UserController {
         }
     }
 
-    private boolean findEmail(User user) {
+    private void findEmailUser(User user) {
         for (User o : users.values()) {
             if (o.getEmail().equals(user.getEmail())) {
-                return true;
+                log.warn("Пользователь с электронной почтой {} уже зарегистрирован.", user.getEmail());
+                throw new UserAlreadyExistException();
             }
         }
-        return false;
     }
 
-    private void isEmptyNameUser(User user) {
+    private void createNameUserIsEmpty(User user) {
         if (user.getName().isBlank()) {
             user.setName(user.getLogin());
         }

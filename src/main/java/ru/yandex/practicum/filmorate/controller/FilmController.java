@@ -6,7 +6,6 @@ import ru.yandex.practicum.filmorate.exception.FilmAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -15,7 +14,6 @@ import java.util.HashMap;
 @RequestMapping("/films")
 public class FilmController {
     private final HashMap<Integer, Film> films = new HashMap<>();
-    private final static LocalDate MIN_DATA_RELEASE_DATE = LocalDate.of(1895, 12, 28);
     private int id = 1;
 
     @GetMapping
@@ -25,16 +23,8 @@ public class FilmController {
 
     @PostMapping
     public Film createFilm(@Valid @RequestBody Film film) {
-        log.info("Получен запрос к эндпоинту на добавление пользователя: " + film);
-        if (findName(film)) {
-            log.warn("Такой фильм уже существует");
-            throw new FilmAlreadyExistException("Такой фильм уже существует");
-        }
-        try {
-            dateRealiseIsAfter(film);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        log.info("Получен запрос к эндпоинту на добавление фильма {} ", film);
+        findNameFilm(film);
         findMaxId();
         film.setId(id);
         films.put(film.getId(), film);
@@ -45,11 +35,11 @@ public class FilmController {
 
     @PutMapping
     public Film updateFilm(@RequestBody Film film) throws Exception {
-        if (film.getId() <0) {
-            throw new Exception("ID < 0");
+        log.info("Получен запрос к эндпоинту на изменение данных о фильме: {}", film);
+        if (film.getId() < 0) {
+            log.warn("id фильма {} не может быть меньше 0", film);
+            throw new Exception();
         }
-        log.info("Получен запрос к эндпоинту на изменение данных о фильме: '{}'", film);
-        dateRealiseIsAfter(film);
         if (films.containsKey(film.getId())) {
             films.put(film.getId(), film);
             log.info("Изменения успешно внесены");
@@ -60,27 +50,19 @@ public class FilmController {
     }
 
     private void findMaxId() {
-        if (!films.isEmpty()) {
-            for (Film filmIds : films.values()) {
-                if (filmIds.getId() >= id) {
-                    id = filmIds.getId() + 1;
-                }
+        for (Film filmIds : films.values()) {
+            if (filmIds.getId() >= id) {
+                id = filmIds.getId() + 1;
             }
         }
     }
 
-    private void dateRealiseIsAfter(Film film) throws Exception {
-        if (film.getReleaseDate().isBefore(MIN_DATA_RELEASE_DATE)) {
-            throw new Exception("Дата не может быть меньше" + MIN_DATA_RELEASE_DATE.toString());
-        }
-    }
-
-    private boolean findName(Film film) {
+    private void findNameFilm(Film film) {
         for (Film o : films.values()) {
             if (o.getName().equals(film.getName())) {
-                return true;
+                log.warn("Фильм {} уже существует", film);
+                throw new FilmAlreadyExistException();
             }
         }
-        return false;
     }
 }
