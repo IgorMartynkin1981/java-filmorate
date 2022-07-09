@@ -1,23 +1,23 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import ru.yandex.practicum.filmorate.exception.ErrorResponse;
 import ru.yandex.practicum.filmorate.exception.UserAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.Collection;
+import java.util.*;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class UserService {
     private final UserStorage userStorage;
-
-    @Autowired
-    public UserService(UserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
 
     public Collection<User> findAll() {
         return userStorage.findAll();
@@ -28,6 +28,7 @@ public class UserService {
     }
 
     public User createUser(User user) {
+        log.info("Получен запрос к эндпоинту на добавление пользователя {}", user);
         findEmailUser(user);
         createNameUserIsEmpty(user);
         user.setId(findMaxIdUsers());
@@ -42,6 +43,63 @@ public class UserService {
         }
         return user;
     }
+
+    public User createFriends(Integer userId, Integer friendId) {
+        log.info("Получен запрос к эндпоинту на добавление пользователю {} друга {}",
+                userStorage.findUser(userId),
+                userStorage.findUser(friendId));
+        Set<Integer> friendsId = new TreeSet<>();
+        User user = userStorage.findUser(userId);
+        if (user.getFriends() != null) {
+            friendsId.addAll(user.getFriends());
+        }
+        friendsId.add(friendId);
+        user.setFriends(friendsId);
+        return updateUser(user);
+    }
+
+    public User deleteFriends(Integer userId, Integer friendId) {
+        log.info("Получен запрос к эндпоинту на удаление у пользователя {} друга {}",
+                userStorage.findUser(userId),
+                userStorage.findUser(friendId));
+        Set<Integer> friendsId = new TreeSet<>();
+        User user = userStorage.findUser(userId);
+        if (user.getFriends() != null) {
+            friendsId.addAll(user.getFriends());
+        } else {
+            log.info("У пользователя {} нет друзей", userStorage.findUser(userId));
+        }
+        friendsId.remove(friendId);
+        user.setFriends(friendsId);
+        return updateUser(user);
+    }
+
+    public List<User> findFriendsUser(Integer id) {
+        List<User> friendsUser = new ArrayList<>();
+        if (userStorage.findUser(id).getFriends() != null) {
+            for (Integer i : userStorage.findUser(id).getFriends()) {
+                friendsUser.add(findUser(i));
+            }
+        } else {
+            log.info("У пользователя {} нет друзей", userStorage.findUser(id));
+        }
+        return friendsUser;
+    }
+
+    public List<User> findCommonsFriend(Integer idFirst, Integer idSecond) {
+        List<User> friendsUser = new ArrayList<>();
+        List<Integer> idsCommon = new ArrayList<>(findUser(idFirst).getFriends());
+        idsCommon.retainAll(findUser(idSecond).getFriends());
+        if (findUser(idFirst).getFriends() != null || findUser(idSecond).getFriends() != null) {
+            for (Integer i : idsCommon) {
+                friendsUser.add(findUser(i));
+            }
+        } else {
+            log.info("У пользователя нет общих друзей");
+        }
+        return friendsUser;
+    }
+
 
     private int findMaxIdUsers() {
         int id = 1;
@@ -68,5 +126,13 @@ public class UserService {
         if (user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handle(final RuntimeException e) {
+        return new ErrorResponse(
+                "Ошибка с параметром count.", e.getMessage()
+        );
     }
 }
