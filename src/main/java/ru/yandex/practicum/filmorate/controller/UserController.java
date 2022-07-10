@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -39,33 +40,25 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}/friends/{friendId}")
-    public User deleteFriends(@Valid @PathVariable("userId") Integer userId,
-                              @Valid @PathVariable("friendId") Integer friendId) {
+    public User deleteFriends(@PathVariable("userId") Integer userId,
+                              @PathVariable("friendId") Integer friendId) {
         userService.deleteFriends(userId, friendId);
         return userService.findUser(userId);
     }
 
     @GetMapping("/{userId}/friends")
-    public Collection<User> findFriendsUser(@Valid @PathVariable("userId") Integer userId) {
+    public Collection<User> findFriendsUser(@PathVariable("userId") Integer userId) {
         return userService.findFriendsUser(userId);
     }
 
     @GetMapping("/{userId}/friends/common/{otherId}")
-    public Collection<User> findCommonsFriend(@Valid @PathVariable("userId") Integer userId,
-                                              @Valid @PathVariable("otherId") Integer otherId) {
+    public Collection<User> findCommonsFriend(@PathVariable("userId") Integer userId,
+                                              @PathVariable("otherId") Integer otherId) {
         return userService.findCommonsFriend(userId, otherId);
     }
 
     @PutMapping
-    public User updateUser(@Valid @RequestBody User user) {
-        log.info("Получен запрос к эндпоинту на изменение данных пользователя: '{}'", user);
-        /*
-        //---если валидация по отрицательному id не пойдёт, то нужно раскоментить---//
-        if (user.getId() < 0) {
-            log.warn("id пользователя {} не может быть меньше 0", user);
-            throw new Exception();
-        }
-        */
+    public User updateUser(@RequestBody User user) {
         return userService.updateUser(user);
     }
 }

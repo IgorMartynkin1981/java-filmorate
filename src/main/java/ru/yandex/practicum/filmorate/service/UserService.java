@@ -2,16 +2,14 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import ru.yandex.practicum.filmorate.exception.ErrorResponse;
+import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.exception.UserAlreadyExistException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -24,6 +22,9 @@ public class UserService {
     }
 
     public User findUser(Integer id) {
+        if (id <= 0) {
+            throw new IncorrectParameterException("Значение не может быть меньше 0");
+        }
         return userStorage.findUser(id);
     }
 
@@ -36,7 +37,10 @@ public class UserService {
     }
 
     public User updateUser(User user) {
-        if (userStorage.findAll().contains(user)) {
+        if (user.getId() <= 0) {
+            throw new IncorrectParameterException("Значение не может быть меньше 0");
+        }
+        if (findAll().stream().anyMatch(p -> p.getId() == user.getId())) {
             return userStorage.updateUser(user);
         } else {
             createUser(user);
@@ -45,20 +49,33 @@ public class UserService {
     }
 
     public User createFriends(Integer userId, Integer friendId) {
+        if (userId <= 0 || friendId <= 0) {
+            throw new IncorrectParameterException("Значение не может быть меньше 0");
+        }
         log.info("Получен запрос к эндпоинту на добавление пользователю {} друга {}",
-                userStorage.findUser(userId),
-                userStorage.findUser(friendId));
+                findUser(userId),
+                findUser(friendId));
+        User user = addFriend(userId, friendId);
+        User friend = addFriend(friendId, userId);
+        return user;
+    }
+
+    private User addFriend(Integer userId, Integer friendId) {
         Set<Integer> friendsId = new TreeSet<>();
-        User user = userStorage.findUser(userId);
+        User user = findUser(userId);
         if (user.getFriends() != null) {
             friendsId.addAll(user.getFriends());
         }
         friendsId.add(friendId);
         user.setFriends(friendsId);
-        return updateUser(user);
+        updateUser(user);
+        return user;
     }
 
     public User deleteFriends(Integer userId, Integer friendId) {
+        if (userId <= 0 || friendId <= 0) {
+            throw new IncorrectParameterException("Значение не может быть меньше 0");
+        }
         log.info("Получен запрос к эндпоинту на удаление у пользователя {} друга {}",
                 userStorage.findUser(userId),
                 userStorage.findUser(friendId));
@@ -74,32 +91,40 @@ public class UserService {
         return updateUser(user);
     }
 
-    public List<User> findFriendsUser(Integer id) {
+    public Collection<User> findFriendsUser(Integer id) {
+        if (id <= 0) {
+            throw new IncorrectParameterException("Значение не может быть меньше 0");
+        }
         List<User> friendsUser = new ArrayList<>();
-        if (userStorage.findUser(id).getFriends() != null) {
-            for (Integer i : userStorage.findUser(id).getFriends()) {
+        if (findUser(id).getFriends() != null) {
+            for (Integer i : findUser(id).getFriends()) {
                 friendsUser.add(findUser(i));
             }
         } else {
             log.info("У пользователя {} нет друзей", userStorage.findUser(id));
+            return friendsUser;
         }
         return friendsUser;
     }
 
-    public List<User> findCommonsFriend(Integer idFirst, Integer idSecond) {
+    public Collection<User> findCommonsFriend(Integer idFirst, Integer idSecond) {
+        if (idFirst <= 0 || idSecond <= 0) {
+            throw new IncorrectParameterException("Значение не может быть меньше 0");
+        }
         List<User> friendsUser = new ArrayList<>();
-        List<Integer> idsCommon = new ArrayList<>(findUser(idFirst).getFriends());
-        idsCommon.retainAll(findUser(idSecond).getFriends());
+        Set<Integer> firstUser = findUser(idFirst).getFriends();
+        Set<Integer> secondUser = findUser(idSecond).getFriends();
         if (findUser(idFirst).getFriends() != null || findUser(idSecond).getFriends() != null) {
-            for (Integer i : idsCommon) {
+            List<Integer> common = firstUser.stream().filter(secondUser :: contains).collect(Collectors.toList());
+            for (Integer i : common) {
                 friendsUser.add(findUser(i));
             }
         } else {
             log.info("У пользователя нет общих друзей");
+            return friendsUser;
         }
         return friendsUser;
     }
-
 
     private int findMaxIdUsers() {
         int id = 1;
@@ -126,13 +151,5 @@ public class UserService {
         if (user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handle(final RuntimeException e) {
-        return new ErrorResponse(
-                "Ошибка с параметром count.", e.getMessage()
-        );
     }
 }
