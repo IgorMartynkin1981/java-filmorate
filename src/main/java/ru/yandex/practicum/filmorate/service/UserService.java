@@ -3,8 +3,10 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
+import ru.yandex.practicum.filmorate.exception.FilmAlreadyExistException;
+import ru.yandex.practicum.filmorate.exception.InvalidEmailException;
 import ru.yandex.practicum.filmorate.exception.UserAlreadyExistException;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -23,7 +25,7 @@ public class UserService {
 
     public User findUser(Long id) {
         if (id <= 0) {
-            throw new IncorrectParameterException("Значение не может быть меньше 0");
+            throw new UserNotFoundException("Значение не может быть меньше 0");
         }
         return userStorage.findUser(id);
     }
@@ -38,19 +40,18 @@ public class UserService {
 
     public User updateUser(User user) {
         if (user.getId() <= 0) {
-            throw new IncorrectParameterException("Значение не может быть меньше 0");
+            throw new UserNotFoundException("Значение не может быть меньше 0");
         }
-        if (findAll().stream().anyMatch(p -> p.getId() == user.getId())) {
+        if (findAll().stream().anyMatch(p -> p.getId().equals(user.getId()))) {
             return userStorage.updateUser(user);
         } else {
-            userStorage.createUser(user);
+            throw new UserNotFoundException("Значение не может быть меньше 0");
         }
-        return user;
     }
 
     public User createFriends(Long userId, Long friendId) {
         if (userId <= 0 || friendId <= 0) {
-            throw new IncorrectParameterException("Значение не может быть меньше 0");
+            throw new UserNotFoundException("Значение не может быть меньше 0");
         }
         log.info("Получен запрос к эндпоинту на добавление пользователю {} друга {}",
                 findUser(userId),
@@ -74,11 +75,17 @@ public class UserService {
 
     public User deleteFriends(Long userId, Long friendId) {
         if (userId <= 0 || friendId <= 0) {
-            throw new IncorrectParameterException("Значение не может быть меньше 0");
+            throw new UserNotFoundException("Значение не может быть меньше 0");
         }
         log.info("Получен запрос к эндпоинту на удаление у пользователя {} друга {}",
                 userStorage.findUser(userId),
                 userStorage.findUser(friendId));
+        User user = deleteFriend(userId, friendId);
+        User friend = deleteFriend(friendId, userId);
+        return user;
+    }
+
+    private User deleteFriend(Long userId, Long friendId) {
         Set<Long> friendsId = new TreeSet<>();
         User user = userStorage.findUser(userId);
         if (user.getFriends() != null) {
@@ -88,12 +95,13 @@ public class UserService {
         }
         friendsId.remove(friendId);
         user.setFriends(friendsId);
-        return updateUser(user);
+        updateUser(user);
+        return user;
     }
 
     public Collection<User> findFriendsUser(Long id) {
         if (id <= 0) {
-            throw new IncorrectParameterException("Значение не может быть меньше 0");
+            throw new UserNotFoundException("Значение не может быть меньше 0");
         }
         List<User> friendsUser = new ArrayList<>();
         if (findUser(id).getFriends() != null) {
@@ -109,7 +117,7 @@ public class UserService {
 
     public Collection<User> findCommonsFriend(Long idFirst, Long idSecond) {
         if (idFirst <= 0 || idSecond <= 0) {
-            throw new IncorrectParameterException("Значение не может быть меньше 0");
+            throw new UserNotFoundException("Значение не может быть меньше 0");
         }
         List<User> friendsUser = new ArrayList<>();
         Set<Long> firstUser = findUser(idFirst).getFriends();

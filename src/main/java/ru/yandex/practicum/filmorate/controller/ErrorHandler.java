@@ -11,7 +11,7 @@ import ru.yandex.practicum.filmorate.model.ErrorResponse;
 public class ErrorHandler {
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleIncorrectParameterException(final IncorrectParameterException e) {
         return new ErrorResponse(
                 String.format("Ошибка с полем \"%s\".", e.getParameter())
@@ -28,7 +28,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handlePostNotFoundException(final PostNotFoundException e) {
+    public ErrorResponse handlePostNotFoundException(final FilmNotFoundException e) {
         return new ErrorResponse(
                 e.getMessage()
         );

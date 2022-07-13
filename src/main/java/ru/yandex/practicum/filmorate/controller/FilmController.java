@@ -2,7 +2,9 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -33,12 +35,16 @@ public class FilmController {
         return filmService.updateFilm(film);
     }
 
-    /*@GetMapping("/popular")
-    public Collection<Film> findAllPopular (@RequestParam(defaultValue = "0", required = false) Integer page,
-    @RequestParam(defaultValue = "10", required = false) Integer size,
-    @RequestParam(defaultValue = DESCENDING_ORDER, required = false) String sort
-    ) {
+    @PutMapping("/{id}/like/{userId}")
+    public Film putLike(@PathVariable("id") Long id,
+                        @PathVariable("userId") Long userId) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED, "Метод /feed ещё не реализован.");
+    }
 
-    }*/
+    @DeleteMapping("{id}/like/{userId}")
+    public Film deleteLike(@PathVariable("id") Long id,
+                           @PathVariable("userId") Long userId) {
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED, "Метод /feed ещё не реализован.");
+    }
 
 }
