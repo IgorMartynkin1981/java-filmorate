@@ -10,7 +10,7 @@ import java.util.HashMap;
 @Slf4j
 @Component
 public class InMemoryUserStorage implements UserStorage{
-    private final HashMap<Integer, User> users = new HashMap<>();
+    private final HashMap<Long, User> users = new HashMap<>();
 
     @Override
     public Collection<User> findAll() {
@@ -18,7 +18,7 @@ public class InMemoryUserStorage implements UserStorage{
     }
 
     @Override
-    public User findUser(Integer idUser) {
+    public User findUser(Long idUser) {
         return users.get(idUser);
     }
 

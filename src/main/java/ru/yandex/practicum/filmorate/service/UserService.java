@@ -21,7 +21,7 @@ public class UserService {
         return userStorage.findAll();
     }
 
-    public User findUser(Integer id) {
+    public User findUser(Long id) {
         if (id <= 0) {
             throw new IncorrectParameterException("Значение не может быть меньше 0");
         }
@@ -43,12 +43,12 @@ public class UserService {
         if (findAll().stream().anyMatch(p -> p.getId() == user.getId())) {
             return userStorage.updateUser(user);
         } else {
-            createUser(user);
+            userStorage.createUser(user);
         }
         return user;
     }
 
-    public User createFriends(Integer userId, Integer friendId) {
+    public User createFriends(Long userId, Long friendId) {
         if (userId <= 0 || friendId <= 0) {
             throw new IncorrectParameterException("Значение не может быть меньше 0");
         }
@@ -60,8 +60,8 @@ public class UserService {
         return user;
     }
 
-    private User addFriend(Integer userId, Integer friendId) {
-        Set<Integer> friendsId = new TreeSet<>();
+    private User addFriend(Long userId, Long friendId) {
+        Set<Long> friendsId = new TreeSet<>();
         User user = findUser(userId);
         if (user.getFriends() != null) {
             friendsId.addAll(user.getFriends());
@@ -72,14 +72,14 @@ public class UserService {
         return user;
     }
 
-    public User deleteFriends(Integer userId, Integer friendId) {
+    public User deleteFriends(Long userId, Long friendId) {
         if (userId <= 0 || friendId <= 0) {
             throw new IncorrectParameterException("Значение не может быть меньше 0");
         }
         log.info("Получен запрос к эндпоинту на удаление у пользователя {} друга {}",
                 userStorage.findUser(userId),
                 userStorage.findUser(friendId));
-        Set<Integer> friendsId = new TreeSet<>();
+        Set<Long> friendsId = new TreeSet<>();
         User user = userStorage.findUser(userId);
         if (user.getFriends() != null) {
             friendsId.addAll(user.getFriends());
@@ -91,13 +91,13 @@ public class UserService {
         return updateUser(user);
     }
 
-    public Collection<User> findFriendsUser(Integer id) {
+    public Collection<User> findFriendsUser(Long id) {
         if (id <= 0) {
             throw new IncorrectParameterException("Значение не может быть меньше 0");
         }
         List<User> friendsUser = new ArrayList<>();
         if (findUser(id).getFriends() != null) {
-            for (Integer i : findUser(id).getFriends()) {
+            for (Long i : findUser(id).getFriends()) {
                 friendsUser.add(findUser(i));
             }
         } else {
@@ -107,16 +107,16 @@ public class UserService {
         return friendsUser;
     }
 
-    public Collection<User> findCommonsFriend(Integer idFirst, Integer idSecond) {
+    public Collection<User> findCommonsFriend(Long idFirst, Long idSecond) {
         if (idFirst <= 0 || idSecond <= 0) {
             throw new IncorrectParameterException("Значение не может быть меньше 0");
         }
         List<User> friendsUser = new ArrayList<>();
-        Set<Integer> firstUser = findUser(idFirst).getFriends();
-        Set<Integer> secondUser = findUser(idSecond).getFriends();
+        Set<Long> firstUser = findUser(idFirst).getFriends();
+        Set<Long> secondUser = findUser(idSecond).getFriends();
         if (findUser(idFirst).getFriends() != null || findUser(idSecond).getFriends() != null) {
-            List<Integer> common = firstUser.stream().filter(secondUser :: contains).collect(Collectors.toList());
-            for (Integer i : common) {
+            List<Long> common = firstUser.stream().filter(secondUser::contains).collect(Collectors.toList());
+            for (Long i : common) {
                 friendsUser.add(findUser(i));
             }
         } else {
@@ -126,8 +126,8 @@ public class UserService {
         return friendsUser;
     }
 
-    private int findMaxIdUsers() {
-        int id = 1;
+    private Long findMaxIdUsers() {
+        Long id = 1L;
         if (!userStorage.findAll().isEmpty()) {
             for (User userIds : userStorage.findAll()) {
                 if (userIds.getId() >= id) {

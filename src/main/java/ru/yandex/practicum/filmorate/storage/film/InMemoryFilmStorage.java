@@ -10,7 +10,7 @@ import java.util.HashMap;
 @Slf4j
 @Component
 public class InMemoryFilmStorage implements FilmStorage{
-    private final HashMap<Integer, Film> films = new HashMap<>();
+    private final HashMap<Long, Film> films = new HashMap<>();
 
     @Override
     public Collection<Film> findAll() {
@@ -18,7 +18,7 @@ public class InMemoryFilmStorage implements FilmStorage{
     }
 
     @Override
-    public Film findFilm(Integer id) {
+    public Film findFilm(Long id) {
         return films.get(id);
     }
 

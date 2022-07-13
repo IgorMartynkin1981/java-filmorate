@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exception.FilmAlreadyExistException;
+import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
@@ -30,12 +31,14 @@ public class FilmService {
         return filmStorage.createFilm(film);
     }
 
-    public Film updateFilm(@RequestBody Film film) {
-        if (filmStorage.findAll().contains(film)) {
-            filmStorage.updateFilm(film);
-            log.info("Изменения успешно внесены");
+    public Film updateFilm(Film film) {
+        if (film.getId() <= 0) {
+            throw new IncorrectParameterException("Значение не может быть меньше 0");
+        }
+        if (findAll().stream().anyMatch(p -> p.getId() == film.getId())) {
+            return filmStorage.updateFilm(film);
         } else {
-            createFilm(film);
+            filmStorage.createFilm(film);
         }
         return film;
     }

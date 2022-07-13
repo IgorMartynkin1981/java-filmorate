@@ -7,14 +7,13 @@ import lombok.Data;
 import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.Set;
-import java.util.TreeSet;
 
 @Data
 @Builder
 @AllArgsConstructor
 public class User {
     @PositiveOrZero(message = "Id должен быть положительным")
-    private int id;
+    private Long id;
     @NotNull
     @NotBlank(message = "Адрес электронной почты не может быть пустым.")
     @Email(message = "Email должен быть корректным адресом электронной почты")
@@ -26,5 +25,5 @@ public class User {
     private String name;
     @Past(message = "Дата рождения не должна быть больше текущей")
     private LocalDate birthday;
-    private Set<Integer> friends;
+    private Set<Long> friends;
 }

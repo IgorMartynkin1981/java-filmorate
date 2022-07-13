@@ -28,15 +28,17 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film updateFilm(@Valid @RequestBody Film film) {
+    public Film updateFilm(@RequestBody Film film) {
         log.info("Получен запрос к эндпоинту на изменение данных о фильме: {}", film);
-        /*
-        //---если валидация по отрицательному id не пойдёт, то нужно раскоментить---//
-        if (film.getId() < 0) {
-            log.warn("id фильма {} не может быть меньше 0", film);
-            throw new Exception();
-        }
-        */
         return filmService.updateFilm(film);
     }
+
+    /*@GetMapping("/popular")
+    public Collection<Film> findAllPopular (@RequestParam(defaultValue = "0", required = false) Integer page,
+    @RequestParam(defaultValue = "10", required = false) Integer size,
+    @RequestParam(defaultValue = DESCENDING_ORDER, required = false) String sort
+    ) {
+
+    }*/
+
 }
