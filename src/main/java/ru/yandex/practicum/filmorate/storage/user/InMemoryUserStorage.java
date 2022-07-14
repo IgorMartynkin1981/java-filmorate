@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 @Slf4j
 @Component
-public class InMemoryUserStorage implements UserStorage{
+public class InMemoryUserStorage implements UserStorage {
     private final HashMap<Long, User> users = new HashMap<>();
 
     @Override

@@ -43,6 +43,14 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleFilmNotLikesException(final FilmNotLikesException e) {
+        return new ErrorResponse(
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handlePostNotFoundException(final UserAlreadyExistException e) {
         return new ErrorResponse(

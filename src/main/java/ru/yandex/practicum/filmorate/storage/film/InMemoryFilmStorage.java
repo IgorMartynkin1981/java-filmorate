@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 @Slf4j
 @Component
-public class InMemoryFilmStorage implements FilmStorage{
+public class InMemoryFilmStorage implements FilmStorage {
     private final HashMap<Long, Film> films = new HashMap<>();
 
     @Override
