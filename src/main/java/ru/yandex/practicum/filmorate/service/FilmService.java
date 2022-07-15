@@ -33,7 +33,7 @@ public class FilmService {
     }
 
     public Film createFilm(Film film) {
-        findNameFilm(film);
+        findForFilmByName(film);
         film.setId(findMaxId());
         return filmStorage.createFilm(film);
     }
@@ -51,20 +51,18 @@ public class FilmService {
 
     private Long findMaxId() {
         Long id = 1L;
-        for (Film filmIds : filmStorage.findAll()) {
-            if (filmIds.getId() >= id) {
-                id = filmIds.getId() + 1;
+        for (Film film : filmStorage.findAll()) {
+            if (film.getId() >= id) {
+                id = film.getId() + 1;
             }
         }
         return id;
     }
 
-    private void findNameFilm(Film film) {
-        for (Film o : filmStorage.findAll()) {
-            if (o.getName().equals(film.getName())) {
-                log.warn("Фильм {} уже существует", film);
-                throw new FilmAlreadyExistException();
-            }
+    private void findForFilmByName(Film film) {
+        if (findAll().stream().anyMatch(f -> f.getName().equals(film.getName()))) {
+            log.warn("Фильм {} уже существует", film);
+            throw new FilmAlreadyExistException();
         }
     }
 
@@ -93,7 +91,7 @@ public class FilmService {
             if (film.getLike() != null) {
                 likeId.addAll(film.getLike());
             } else {
-                throw new FilmNotLikesException("У фильма нет Лайков.");
+                throw new FilmNotLikesException("У фильма нет лайков.");
             }
             likeId.remove(userId);
             film.setLike(likeId);
