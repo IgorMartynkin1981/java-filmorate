@@ -27,7 +27,7 @@ public class FilmService {
 
     public Film findFilm(Long id) {
         if (id <= 0) {
-            throw new FilmNotFoundException("Значение не может быть меньше 0");
+            throw new FilmNotFoundException("Значение id не может быть меньше 0");
         }
         return filmStorage.findFilm(id);
     }
@@ -40,12 +40,12 @@ public class FilmService {
 
     public Film updateFilm(Film film) {
         if (film.getId() <= 0) {
-            throw new FilmNotFoundException("Значение не может быть меньше 0");
+            throw new FilmNotFoundException("Значение id не может быть меньше 0");
         }
         if (findAll().stream().anyMatch(p -> p.getId().equals(film.getId()))) {
             return filmStorage.updateFilm(film);
         } else {
-            throw new FilmNotFoundException("Значение не может быть меньше 0");
+            throw new FilmNotFoundException("Фильм в базе отсутствует");
         }
     }
 

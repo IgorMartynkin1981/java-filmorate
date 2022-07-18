@@ -23,7 +23,7 @@ public class UserService {
 
     public User findUser(Long id) {
         if (id <= 0) {
-            throw new UserNotFoundException("Значение не может быть меньше 0");
+            throw new UserNotFoundException("Значение id пользователя не может быть меньше 0");
         }
         return userStorage.findUser(id);
     }
@@ -38,18 +38,18 @@ public class UserService {
 
     public User updateUser(User user) {
         if (user.getId() <= 0) {
-            throw new UserNotFoundException("Значение не может быть меньше 0");
+            throw new UserNotFoundException("Значение id пользователя не может быть меньше 0");
         }
         if (findAll().stream().anyMatch(p -> p.getId().equals(user.getId()))) {
             return userStorage.updateUser(user);
         } else {
-            throw new UserNotFoundException("Значение не может быть меньше 0");
+            throw new UserNotFoundException("Пользователь не найден");
         }
     }
 
     public User createFriends(Long userId, Long friendId) {
         if (userId <= 0 || friendId <= 0) {
-            throw new UserNotFoundException("Значение не может быть меньше 0");
+            throw new UserNotFoundException("Значение id пользователя или друга не может быть меньше 0");
         }
         log.info("Получен запрос к эндпоинту на добавление пользователю {} друга {}",
                 findUser(userId),
@@ -73,7 +73,7 @@ public class UserService {
 
     public User deleteFriends(Long userId, Long friendId) {
         if (userId <= 0 || friendId <= 0) {
-            throw new UserNotFoundException("Значение не может быть меньше 0");
+            throw new UserNotFoundException("Значение id пользователя или друга не может быть меньше 0");
         }
         log.info("Получен запрос к эндпоинту на удаление у пользователя {} друга {}",
                 userStorage.findUser(userId),
@@ -99,7 +99,7 @@ public class UserService {
 
     public Collection<User> findFriendsUser(Long id) {
         if (id <= 0) {
-            throw new UserNotFoundException("Значение не может быть меньше 0");
+            throw new UserNotFoundException("Значение id пользователя не может быть меньше 0");
         }
         List<User> friendsUser = new ArrayList<>();
         if (findUser(id).getFriends() != null) {
@@ -115,7 +115,7 @@ public class UserService {
 
     public Collection<User> findCommonsFriend(Long idFirst, Long idSecond) {
         if (idFirst <= 0 || idSecond <= 0) {
-            throw new UserNotFoundException("Значение не может быть меньше 0");
+            throw new UserNotFoundException("Значение id пользователей не может быть меньше 0");
         }
         List<User> friendsUser = new ArrayList<>();
         Set<Long> firstUser = findUser(idFirst).getFriends();
@@ -126,7 +126,9 @@ public class UserService {
                 friendsUser.add(findUser(i));
             }
         } else {
-            log.info("У пользователя нет общих друзей");
+            log.info("У пользователя {} нет общих друзей c пользователем {}."
+                    ,findUser(idFirst).getName()
+                    ,findUser(idSecond).getName());
             return friendsUser;
         }
         return friendsUser;
