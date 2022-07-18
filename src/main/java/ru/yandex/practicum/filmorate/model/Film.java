@@ -7,13 +7,14 @@ import ru.yandex.practicum.filmorate.validation.MinDataReleaseFilmValidation;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @Builder
 @AllArgsConstructor
 public class Film {
     @PositiveOrZero(message = "Id должен быть положительным")
-    private int id;
+    private Long id;
     @NotNull
     @NotBlank(message = "Название фильма не может быть пустым.")
     private String name;
@@ -23,4 +24,5 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private int duration;
+    private Set<Long> like;
 }
