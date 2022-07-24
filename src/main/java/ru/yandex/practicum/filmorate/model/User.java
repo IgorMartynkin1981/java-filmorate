@@ -26,5 +26,5 @@ public class User {
     private String name;
     @Past(message = "Дата рождения не должна быть больше текущей")
     private LocalDate birthday;
-    private Set<Long> friends;
+    private Set<Long> friends; //доработать до работы с базой
 }
