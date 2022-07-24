@@ -26,5 +26,5 @@ public class User {
     private String name;
     @Past(message = "Дата рождения не должна быть больше текущей")
     private LocalDate birthday;
-    private HashMap<Long, Boolean> friends;
+    private Set<Long> friends;
 }
