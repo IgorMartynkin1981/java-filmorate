@@ -25,4 +25,7 @@ public class Film {
     @Positive
     private int duration;
     private Set<Long> like;
+    private Set<String> genre;
+    private String rating;
+
 }
