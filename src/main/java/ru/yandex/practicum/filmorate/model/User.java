@@ -6,6 +6,7 @@ import lombok.Data;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.Set;
 
 @Data
@@ -25,5 +26,5 @@ public class User {
     private String name;
     @Past(message = "Дата рождения не должна быть больше текущей")
     private LocalDate birthday;
-    private Set<Long> friends;
+    private HashMap<Long, Boolean> friends;
 }
