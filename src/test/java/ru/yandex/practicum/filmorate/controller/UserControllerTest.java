@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -36,8 +37,9 @@ class UserControllerTest {
                 , "user1@mail.com"
                 , "User1"
                 , "User1"
-                , LocalDate.of(1981, 12, 23)
-                , Set.of());
+                , Date.valueOf("1981.12.23")
+                //, Set.of()
+                );
         Mockito.when(userService.findUser(1L)).thenReturn(user);
 
         var responseJson = mockMvc.perform(get("/users/1"))
