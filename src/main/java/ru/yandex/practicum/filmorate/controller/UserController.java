@@ -2,6 +2,8 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -34,15 +36,15 @@ public class UserController {
     @PutMapping("/{userId}/friends/{friendId}")
     public User createFriends(@Valid @PathVariable("userId") Long userId,
                               @Valid @PathVariable("friendId") Long friendId) {
-        userService.createFriends(userId, friendId);
+        userService.addFriends(userId, friendId);
         return userService.findUser(userId);
     }
 
     @DeleteMapping("/{userId}/friends/{friendId}")
-    public User deleteFriends(@PathVariable("userId") Long userId,
-                              @PathVariable("friendId") Long friendId) {
+    public ResponseEntity<Collection<User>> deleteFriends(@PathVariable("userId") Long userId,
+                                                @PathVariable("friendId") Long friendId) {
         userService.deleteFriends(userId, friendId);
-        return userService.findUser(userId);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @DeleteMapping("/{userId}")

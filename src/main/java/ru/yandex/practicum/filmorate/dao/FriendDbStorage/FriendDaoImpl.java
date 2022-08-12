@@ -4,14 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.UserDbStorage.UserDaoImpl;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 
 @Component
@@ -25,8 +24,8 @@ public class FriendDaoImpl implements FriendDAO{
     }
 
     @Override
-    public void createFriend(Long userId, Long friendId) {
-        String sqlQuery = "INSERT INTO friends (USER_ID, FRIEND_ID, CONFIRMING)" +
+    public void addFriend(Long userId, Long friendId) {
+        String sqlQuery = "INSERT INTO friends (user_id, friend_id, confirming)" +
                 "VALUES (?, ?, ?)";
 
         jdbcTemplate.update(connection -> {
@@ -39,46 +38,46 @@ public class FriendDaoImpl implements FriendDAO{
     }
 
     @Override
-    public User deleteFriend(Long userId, Long friendId) {
-        return null;
-    }
-
-    @Override
-    public User deleteFriends(Long userId) {
-        return null;
-    }
-
-    @Override
-    public void deleteFriends() {
-
+    public void deleteFriend(Long userId, Long friendId) {
+        String sqlQuery = "DELETE FROM friends WHERE user_id = ? AND friend_id=?";
+        jdbcTemplate.update(sqlQuery, userId, friendId);
     }
 
     @Override
     public Collection<User> findFriendsUser(Long id) {
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet("SELECT * FROM FRIENDS WHERE USER_ID=?"
-                , id
-                );
-        if(userRows.next()) {
-//            User user = new User(
-//                    userRows.getLong("id"),
-//                    userRows.getString("email"),
-//                    userRows.getString("login"),
-//                    userRows.getString("name"),
-//                    userRows.getDate("birthday")
-//            );
+        return jdbcTemplate.query(getSqlFriends(), this::mapRowToObject, id);
+    }
 
-            log.info("Запись найдена {}", userRows.getRow());
+    private String getSqlFriends() {
+        return "SELECT u.id, u.login, u.name, u.email, u.birthday "
+                + "FROM users u "
+                + "WHERE u.id IN ("
+                    + "SELECT f.friend_id "
+                    + "FROM friends f "
+                    + "WHERE f.user_id = ?)";
+    }
 
-            return null;
-        } else {
-            log.info("Пользователь с идентификатором не найден.");
-            return null;
-        }
-        return null;
+    private User mapRowToObject(ResultSet resultSet, int row) throws SQLException {
+        return User.builder()
+                .id(resultSet.getLong("id"))
+                .email(resultSet.getString("email"))
+                .login(resultSet.getString("login"))
+                .name(resultSet.getString("name"))
+                .birthday(resultSet.getDate("birthday"))
+                .build();
     }
 
     @Override
     public Collection<User> findCommonsFriend(Long idFirst, Long idSecond) {
-        return null;
+        return jdbcTemplate.query(getSqlCommonFriends(), this::mapRowToObject, idFirst, idSecond);
+    }
+
+    private String getSqlCommonFriends() {
+        return "SELECT u.id, u.login, u.name, u.email, u.birthday FROM users u "
+                + "WHERE u.id IN ("
+                    + "SELECT f.friend_id FROM friends f "
+                    + "WHERE f.user_id = ? INTERSECT "
+                        + "SELECT f.friend_id FROM friends f "
+                        + "WHERE f.user_id = ?)";
     }
 }

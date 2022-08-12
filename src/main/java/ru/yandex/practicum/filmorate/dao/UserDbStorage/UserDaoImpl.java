@@ -27,7 +27,7 @@ public class UserDaoImpl implements UserDAO {
 
     @Override
     public Collection<User> findAll() {
-        String sqlQuery = "select id, email, login, name, birthday from users";
+        String sqlQuery = "SELECT * FROM users";
         return jdbcTemplate.query(sqlQuery, this::mapRowToUsers);
     }
 

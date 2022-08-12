@@ -24,5 +24,6 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private int duration;
+    private RatingMPA ratingMPA;
     private Set<Long> like;
 }
