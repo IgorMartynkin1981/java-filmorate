@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.RatingMPA;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.time.LocalDate;
@@ -36,6 +37,7 @@ class FilmControllerTest {
                 , ""
                 , LocalDate.now()
                 , 45
+                , new RatingMPA(1L, "qwer")
                 , Set.of());
         Mockito.when(filmService.findFilm(1L)).thenReturn(film);
 

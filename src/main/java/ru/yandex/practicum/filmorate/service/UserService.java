@@ -5,27 +5,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.FriendDbStorage.FriendDAO;
 import ru.yandex.practicum.filmorate.dao.UserDbStorage.UserDAO;
-import ru.yandex.practicum.filmorate.exception.UserAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.*;
+import java.util.Collection;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class UserService {
-    private final UserStorage userStorage;
     private final UserDAO userDAO;
     private final FriendDAO friendDAO;
 
-    //Перевел в UserDAO
     public Collection<User> findAll() {
         return userDAO.findAll();
     }
 
-    //Перевел в UserDAO
     public User findUser(Long id) {
         if (id <= 0) {
             throw new UserNotFoundException("Значение id пользователя не может быть меньше 0");
@@ -33,15 +28,10 @@ public class UserService {
         return userDAO.findUser(id);
     }
 
-    //Перевел в UserDAO
     public User createUser(User user) {
-        findEmailUser(user);
         createNameUserIsEmpty(user);
         return userDAO.createUser(user);
-
     }
-
-    //Перевел в UserDAO
     public User updateUser(User user) {
         if (user.getId() <= 0) {
             throw new UserNotFoundException("Значение id пользователя не может быть меньше 0");
@@ -79,15 +69,6 @@ public class UserService {
             throw new UserNotFoundException("Значение id пользователей не может быть меньше 0");
         }
         return friendDAO.findCommonsFriend(idFirst, idSecond);
-    }
-
-    private void findEmailUser(User user) {
-        for (User o : userDAO.findAll()) {
-            if (o.getEmail().equals(user.getEmail())) {
-                log.warn("Пользователь с электронной почтой {} уже зарегистрирован.", user.getEmail());
-                throw new UserAlreadyExistException();
-            }
-        }
     }
 
     private void createNameUserIsEmpty(User user) {

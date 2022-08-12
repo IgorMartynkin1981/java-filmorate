@@ -7,7 +7,8 @@ import lombok.Data;
 @Data
 @Builder
 @AllArgsConstructor
-public class Genre {
+public class Like {
     private Long id;
-    private String name;
+    private Long filmId;
+    private Long userId;
 }

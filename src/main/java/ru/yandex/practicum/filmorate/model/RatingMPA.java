@@ -9,5 +9,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class RatingMPA {
     private Long id;
-    private String ratingName;
+    private String name;
 }

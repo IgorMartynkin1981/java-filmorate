@@ -106,6 +106,5 @@ public class UserDaoImpl implements UserDAO {
     public void deleteUser(User user) {
         String sqlQuery = "DELETE FROM users WHERE id = ?";
         jdbcTemplate.update(sqlQuery, user.getId());
-
     }
 }

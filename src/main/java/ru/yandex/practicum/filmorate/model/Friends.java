@@ -7,7 +7,9 @@ import lombok.Data;
 @Data
 @Builder
 @AllArgsConstructor
-public class Genre {
+public class Friends {
     private Long id;
-    private String name;
+    private Long userId;
+    private Long friendsId;
+    private Boolean confirming;
 }
