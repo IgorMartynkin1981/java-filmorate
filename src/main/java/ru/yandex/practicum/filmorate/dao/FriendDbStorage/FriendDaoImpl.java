@@ -28,13 +28,7 @@ public class FriendDaoImpl implements FriendDAO{
         String sqlQuery = "INSERT INTO friends (user_id, friend_id, confirming)" +
                 "VALUES (?, ?, ?)";
 
-        jdbcTemplate.update(connection -> {
-            PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"id"});
-            stmt.setLong(1, userId);
-            stmt.setLong(2, friendId);
-            stmt.setBoolean(3, true);
-            return stmt;
-        });
+        jdbcTemplate.update(sqlQuery, userId, friendId, true);
     }
 
     @Override

@@ -3,17 +3,18 @@ package ru.yandex.practicum.filmorate.dao.FilmDbStorage;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface FilmDAO {
-    Collection<Film> findAll();
+    Long addFilmInStorage(Film film);
 
-    Film findFilm(Long id);
+    void deleteFilmInStorage(Long id);
 
-    Film createFilm(Film film);
+    void updateFilmInStorage(Film film);
 
-    Film updateFilm(Film film);
+    Collection<Film> getAllFilmsInStorage();
 
-    void deleteFilms();
+    Film getFilmInStorage(Long id);
 
-    void deleteFilm(Film film);
+    List<Film> getPopularFilms(int count);
 }
