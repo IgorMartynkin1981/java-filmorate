@@ -4,17 +4,22 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface FilmDAO {
-    Long addFilmInStorage(Film film);
+    Optional<Film> loadFilm(Long id);
 
-    void deleteFilmInStorage(Long id);
+    long saveFilm(Film film);
 
-    void updateFilmInStorage(Film film);
+    void updateFilm(Film film);
 
-    Collection<Film> getAllFilmsInStorage();
+    List<Film> loadFilms();
 
-    Film getFilmInStorage(Long id);
+    void saveRatingPoint(Long filmId, Long userId);
 
-    List<Film> getPopularFilms(int count);
+    void deleteRatingPoint(Long filmId, Long userId);
+
+    boolean hasFilmRatingFromUser(Long filmId, Long userId);
+
+    List<Film> loadPopularFilms(Long count);
 }

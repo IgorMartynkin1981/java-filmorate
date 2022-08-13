@@ -27,9 +27,9 @@ public class FilmRowMapper implements RowMapper<Film> {
                 .name(resultSet.getString("name"))
                 .description(resultSet.getString("description"))
                 .releaseDate(resultSet.getDate("release_date").toLocalDate())
-                .duration(resultSet.getInt("duration"))
+                .duration(resultSet.getLong("duration"))
                 .mpa(mpa)
-                //.genres(genreService.getFilmGenresById(resultSet.getLong("id")))
+                .genres(genreService.getFilmGenresById(resultSet.getLong("id")))
                 .build();
     }
 }

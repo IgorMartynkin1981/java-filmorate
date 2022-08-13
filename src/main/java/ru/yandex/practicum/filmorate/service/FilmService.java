@@ -1,14 +1,10 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.FilmDbStorage.FilmDAO;
-import ru.yandex.practicum.filmorate.dao.GenreDbStorage.GenreDAO;
-import ru.yandex.practicum.filmorate.dao.LikeDbStorage.LikeDAO;
-import ru.yandex.practicum.filmorate.dao.RatingDbStorage.RatingDAO;
-import ru.yandex.practicum.filmorate.dao.UserDbStorage.UserDAO;
 import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -19,101 +15,90 @@ import java.util.*;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+
 public class FilmService {
     private final FilmDAO filmStorage;
-    private final UserDAO userStorage;
-    private final GenreDAO genreDbStorage;
-    private final RatingDAO ratingDbStorage;
-    private final LikeDAO likeDbStorage;
+    private final UserService userService;
+    private final GenreService genreService;
 
-    public Film createFilm(Film film) {
-        long filmId = filmStorage.addFilmInStorage(film);
-//        if (film.getGenres() != null && film.getGenres().size() > 0) {
-//            genreDbStorage.addFilmGenre(filmId, film.getGenres());
-//        }
-//        Film savedFilm = getFilmOrNotFoundException(filmId);
-//        log.debug("Create {}", savedFilm);
-        return getFilm(filmId);
+    @Autowired
+    public FilmService(FilmDAO filmStorage, UserService userService, GenreService genreService) {
+        this.filmStorage = filmStorage;
+        this.userService = userService;
+        this.genreService = genreService;
     }
 
-    public Collection<Film> getAllFilms() {
-        Collection<Film> films;
-        films = filmStorage.getAllFilmsInStorage();
-        for (Film f : films) {
-            Collection<Genre> genres = genreDbStorage.getAllFilmGenres(f.getId());
-            Set<Genre> setGenres = new HashSet<Genre>(genres);
-            //f.setGenres(setGenres);
-            log.info("Подготовка к получению списка фильмов {}      В фильм {} добавлены жанры успешно",
-                    LocalDateTime.now(), f.getId());
-        }
-        if (films != null) {
-            log.info("Получение списка фильмов {}      Фильмы получены успешно", LocalDateTime.now());
+    public Film getFilmOrNotFoundException(Long id) {
+        Optional<Film> film = filmStorage.loadFilm(id);
+        if (film.isPresent()) {
+            log.debug("Load {}", film.get());
+            return film.get();
         } else {
-            log.info("Получение списка фильмов {}      Фильмы отсутствуют", LocalDateTime.now());
+            throw new NotFoundException("User #" + id + " not found");
         }
+    }
+
+    public Film create(Film film) {
+        long filmId = filmStorage.saveFilm(film);
+        if (film.getGenres() != null && film.getGenres().size() > 0) {
+            genreService.addFilmGenres(filmId, film.getGenres());
+        }
+        Film savedFilm = getFilmOrNotFoundException(filmId);
+        log.debug("Create {}", savedFilm);
+        return savedFilm;
+    }
+
+    public Film update(Film film) {
+        Film updatingFilm = getFilmOrNotFoundException(film.getId());
+        if (film.getDescription() == null) film.setDescription(updatingFilm.getDescription());
+        if (film.getReleaseDate() == null) film.setReleaseDate(updatingFilm.getReleaseDate());
+        if (film.getDuration() == 0L) film.setDuration(updatingFilm.getDuration());
+        if (film.getName() == null || film.getName().isBlank()) film.setName(updatingFilm.getName());
+        if (film.getMpa() == null) film.setMpa(updatingFilm.getMpa());
+        if (film.getGenres() == null) {
+            film.setGenres(updatingFilm.getGenres());
+        } else if (film.getGenres().size() == 0) {
+            genreService.deleteFilmGenres(film.getId());
+        } else {
+            genreService.updateFilmGenres(film.getId(), film.getGenres());
+        }
+        filmStorage.updateFilm(film);
+        Film savedFilm = getFilmOrNotFoundException(film.getId());
+        log.debug("Update {}", savedFilm);
+        return savedFilm;
+    }
+
+    public List<Film> getAllFilms() {
+        List<Film> films = filmStorage.loadFilms();
+        log.debug("Load {} movies", films.size());
         return films;
     }
 
-    public Film updateFilm(Film film) {
-        filmStorage.updateFilmInStorage(film);
-        log.info("Обновление фильма {}      Фильм с ID {} обновлен успешно", LocalDateTime.now(), film.getId());
-        genreDbStorage.removeFilmGenres(film.getId());
-//        for (Genre g : film.getGenres()) {
-//            Genre newGenre = genreDbStorage.getGenreById(g.getId()); //проверка что такой тип жанра есть
-//            genreDbStorage.addFilmGenre(film.getId(), newGenre.getId());
-//            log.info("Обновление фильма {}      К фильму с ID {} добавлен жанр {} успешно",
-//                    LocalDateTime.now(), film.getId(), newGenre.getName());
-//        }
-        return getFilm(film.getId());
-    }
-
-    public void addLike(Long filmId, Long userId) {
-        Film film = filmStorage.getFilmInStorage(filmId);
-        Like like = new Like(filmId, userId);
-        userStorage.findUser(userId); // контроль что такой пользователь есть
-        Set<Like> likes = new HashSet<Like>(likeDbStorage.getAllLikes(filmId));
-        if (likes.contains(like)) {
-            throw new IncorrectParameterException("Ошибка добавления лайка, такой лайк уже проставлен");
-        }
-        likeDbStorage.addLike(filmId, userId);
-        filmStorage.updateFilmInStorage(film);
-        log.info("Лайк фильма {}      Пользователь с ID {} проставил лайк на фильм с ID {} успешно",
-                LocalDateTime.now(),
-                userId, filmId);
-    }
-
-    public void removeLike(Long filmId, Long userId) {
-        Film film = filmStorage.getFilmInStorage(filmId);
-        Like like = new Like(filmId, userId);
-        userStorage.findUser(userId); // контроль что такой пользователь есть
-        Set<Like> likes = new HashSet<Like>(likeDbStorage.getAllLikes(filmId));
-        if (!likes.contains(like)) {
-            throw new IncorrectParameterException("Ошибка удвления лайка, такой лайк не существует");
-        }
-        likeDbStorage.removeLike(filmId, userId);
-        filmStorage.updateFilmInStorage(film);
-        log.info("Удаление лайка у фильма {}      Пользователь с ID {} удалил лайк на фильме с ID {} успешно",
-                LocalDateTime.now(),
-                userId, filmId);
-    }
-
-    public List<Film> getTopFilms(int count) {
-        try {
-            return filmStorage.getPopularFilms(count);
-        } catch (DataIntegrityViolationException e) {
-            log.warn(e.getMessage());
-            throw new NotFoundException(String.format("Ошибка получения %d популярных фильмов", count));
+    public void addRatingPoint(Long filmId, Long userId) {
+        getFilmOrNotFoundException(filmId);
+        userService.findUser(userId);
+        if (filmStorage.hasFilmRatingFromUser(filmId, userId)) {
+            log.debug("Attempt to create an existing rating point for movie #{} from user #{}",  filmId, userId);
+        } else {
+            filmStorage.saveRatingPoint(filmId, userId);
+            log.debug("Creating rating point for movie #{} from user #{}",  filmId, userId);
         }
     }
 
-    public Film getFilm(Long id) {
-        Film film = filmStorage.getFilmInStorage(id);
-//        log.info("Получение фильма {}      Фильм с ID {} получен успешно", LocalDateTime.now(), id);
-//        Collection<Genre> genres = genreDbStorage.getAllFilmGenres(id);
-//        Set<Genre> setGenres = new HashSet<Genre>(genres);
-//        //film.setGenres(setGenres);
-//        log.info("Получение фильма {}      Фильм с ID {}, список жанров получен успешно", LocalDateTime.now(), id);
-        return film;
+    public void deleteRatingPoint(Long filmId, Long userId) {
+        getFilmOrNotFoundException(filmId);
+        userService.findUser(userId);
+        if (filmStorage.hasFilmRatingFromUser(filmId, userId)) {
+            filmStorage.deleteRatingPoint(filmId, userId);
+            log.debug("Delete rating point of movie #{} from user #{}",  filmId, userId);
+        } else {
+            log.debug("Attempt to delete a non-existent rating point for movie #{} from user #{}", filmId, userId);
+        }
+    }
+
+    public List<Film> getPopular(Long count) {
+        List<Film> popular = filmStorage.loadPopularFilms(count);
+        log.debug("Return {} popular films", popular.size());
+        return popular;
     }
 }
