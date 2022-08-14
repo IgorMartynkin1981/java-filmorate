@@ -87,11 +87,6 @@ public class UserService {
         if (findUserByEmail.isPresent()) {
             throw new UserNotFoundException("Пользователь с таким email уже существует");
         }
-
-        Optional<User> findUserByLogin = users.stream().filter(user1 -> user1.getLogin().equals(user.getLogin())).findFirst();
-        if (findUserByLogin.isPresent()) {
-            throw new UserNotFoundException("Пользователь с таким Login уже существует");
-        }
     }
 
     public void deleteUser(Long id) {
