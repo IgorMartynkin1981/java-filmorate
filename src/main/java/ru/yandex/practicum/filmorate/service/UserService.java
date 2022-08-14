@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.exception.UserAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import javax.validation.Valid;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -30,13 +31,13 @@ public class UserService {
         return userDAO.findUser(id);
     }
 
-    public User createUser(User user) {
+    public User createUser(@Valid User user) {
         createNameUserIsEmpty(user);
         findUserDouble(user);
         return userDAO.createUser(user);
     }
 
-    public User updateUser(User user) {
+    public User updateUser(@Valid User user) {
         if (user.getId() <= 0) {
             throw new UserNotFoundException("Значение id пользователя не может быть меньше 0");
         }
