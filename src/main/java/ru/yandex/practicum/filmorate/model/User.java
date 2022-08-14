@@ -5,9 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.*;
-import java.time.LocalDate;
 import java.sql.Date;
-import java.util.Set;
 
 @Data
 @Builder
@@ -26,6 +24,4 @@ public class User {
     private String name;
     @Past(message = "Дата рождения не должна быть больше текущей")
     private Date birthday;
-
-    //private Set<Long> friends;
 }

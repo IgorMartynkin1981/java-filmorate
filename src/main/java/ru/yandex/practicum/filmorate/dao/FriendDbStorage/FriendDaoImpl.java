@@ -8,13 +8,12 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.UserDbStorage.UserDaoImpl;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
 @Component
-public class FriendDaoImpl implements FriendDAO{
+public class FriendDaoImpl implements FriendDAO {
     private final Logger log = LoggerFactory.getLogger(UserDaoImpl.class);
     private final JdbcTemplate jdbcTemplate;
 
@@ -46,9 +45,9 @@ public class FriendDaoImpl implements FriendDAO{
         return "SELECT u.id, u.login, u.name, u.email, u.birthday "
                 + "FROM users u "
                 + "WHERE u.id IN ("
-                    + "SELECT f.friend_id "
-                    + "FROM friends f "
-                    + "WHERE f.user_id = ?)";
+                + "SELECT f.friend_id "
+                + "FROM friends f "
+                + "WHERE f.user_id = ?)";
     }
 
     private User mapRowToObject(ResultSet resultSet, int row) throws SQLException {
@@ -69,9 +68,9 @@ public class FriendDaoImpl implements FriendDAO{
     private String getSqlCommonFriends() {
         return "SELECT u.id, u.login, u.name, u.email, u.birthday FROM users u "
                 + "WHERE u.id IN ("
-                    + "SELECT f.friend_id FROM friends f "
-                    + "WHERE f.user_id = ? INTERSECT "
-                        + "SELECT f.friend_id FROM friends f "
-                        + "WHERE f.user_id = ?)";
+                + "SELECT f.friend_id FROM friends f "
+                + "WHERE f.user_id = ? INTERSECT "
+                + "SELECT f.friend_id FROM friends f "
+                + "WHERE f.user_id = ?)";
     }
 }

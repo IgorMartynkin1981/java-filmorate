@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.dao.FilmDbStorage;
 
 import org.springframework.jdbc.core.RowMapper;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.RatingMPA;
+import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.service.GenreService;
 
 import java.sql.ResultSet;
@@ -18,7 +18,7 @@ public class FilmRowMapper implements RowMapper<Film> {
 
 
     public Film mapRow(ResultSet resultSet, int rowNum) throws SQLException {
-        RatingMPA mpa = RatingMPA.builder().
+        MPA mpa = MPA.builder().
                 id(resultSet.getLong("mpa_id"))
                 .name(resultSet.getString("mpa"))
                 .build();
@@ -27,9 +27,9 @@ public class FilmRowMapper implements RowMapper<Film> {
                 .name(resultSet.getString("name"))
                 .description(resultSet.getString("description"))
                 .releaseDate(resultSet.getDate("release_date").toLocalDate())
-                .duration(resultSet.getLong("duration"))
+                .duration(resultSet.getInt("duration"))
                 .mpa(mpa)
-                .genres(genreService.getFilmGenresById(resultSet.getLong("id")))
+                //.genres(genreService.findAll(resultSet.getLong("id")))
                 .build();
     }
 }

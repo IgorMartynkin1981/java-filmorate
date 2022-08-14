@@ -32,6 +32,7 @@ public class UserService {
         createNameUserIsEmpty(user);
         return userDAO.createUser(user);
     }
+
     public User updateUser(User user) {
         if (user.getId() <= 0) {
             throw new UserNotFoundException("Значение id пользователя не может быть меньше 0");

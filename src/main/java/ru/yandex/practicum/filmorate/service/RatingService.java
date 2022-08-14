@@ -4,11 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.RatingDbStorage.RatingDAO;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.RatingMPA;
+import ru.yandex.practicum.filmorate.exception.MpaNotFoundException;
+import ru.yandex.practicum.filmorate.model.MPA;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.Collection;
 
 @Service
 @Slf4j
@@ -20,18 +19,15 @@ public class RatingService {
         this.ratingDAO = ratingDAO;
     }
 
-    public RatingMPA getMpaOrNotFoundException(long id) {
-        Optional<RatingMPA> mpa = ratingDAO.loadMpaById(id);
-        if (mpa.isPresent()) {
-            log.debug("Load {}", mpa.get());
-            return mpa.get();
-        } else {
-            throw new NotFoundException("MPA #" + id + " not found");
+    public MPA getById(long id) {
+        if (id < 0) {
+            throw new MpaNotFoundException("id должен быть положительным.");
         }
+        return ratingDAO.getById(id);
     }
 
-    public List<RatingMPA> getAllMpa() {
-        List<RatingMPA> mpa = ratingDAO.loadAllMpa();
+    public Collection<MPA> getAllMpa() {
+        Collection<MPA> mpa = ratingDAO.findAll();
         log.debug("Load {} MPA", mpa.size());
         return mpa;
     }

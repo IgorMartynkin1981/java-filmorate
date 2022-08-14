@@ -42,7 +42,7 @@ public class UserController {
 
     @DeleteMapping("/{userId}/friends/{friendId}")
     public ResponseEntity<Collection<User>> deleteFriends(@PathVariable("userId") Long userId,
-                                                @PathVariable("friendId") Long friendId) {
+                                                          @PathVariable("friendId") Long friendId) {
         userService.deleteFriends(userId, friendId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }

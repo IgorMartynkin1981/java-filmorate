@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 @Component
-public class LikeDaoImpl implements LikeDAO{
+public class LikeDaoImpl implements LikeDAO {
     private final JdbcTemplate jdbcTemplate;
 
     public LikeDaoImpl(JdbcTemplate jdbcTemplate) {
@@ -41,8 +41,9 @@ public class LikeDaoImpl implements LikeDAO{
 
 
     private Like makeLike(ResultSet rs) throws SQLException {
+        Long id = rs.getLong("id");
         Long filmId = rs.getLong("film_id");
         Long userId = rs.getLong("user_id");
-        return new Like(filmId, userId);
+        return new Like(id, filmId, userId);
     }
 }

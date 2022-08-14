@@ -8,7 +8,7 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 public class Like {
-    //private Long id;
+    private Long id;
     private Long filmId;
     private Long userId;
 }

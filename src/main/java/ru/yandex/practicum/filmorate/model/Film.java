@@ -23,7 +23,7 @@ public class Film {
     @MinDataReleaseFilmValidation
     private LocalDate releaseDate;
     @Positive
-    private Long duration;
-    private RatingMPA mpa;
+    private int duration;
+    private MPA mpa;
     private List<Genre> genres;
 }
