@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.FriendDbStorage.FriendDAO;
 import ru.yandex.practicum.filmorate.dao.UserDbStorage.UserDAO;
+import ru.yandex.practicum.filmorate.exception.UserAlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -31,9 +32,7 @@ public class UserService {
 
     public User createUser(User user) {
         createNameUserIsEmpty(user);
-        if (findUserDouble(user)) {
-
-        }
+        findUserDouble(user);
         return userDAO.createUser(user);
     }
 
@@ -83,10 +82,12 @@ public class UserService {
     }
 
 
-    private boolean findUserDouble(User user) {
+    private void findUserDouble(User user) {
         Collection<User> users = userDAO.findAll();
         Optional<User> findUserByEmail = users.stream().filter(user1 -> user1.getEmail().equals(user.getEmail())).findFirst();
-        return findUserByEmail.isPresent();
+        if (findUserByEmail.isPresent()) {
+            throw new UserAlreadyExistException("Пользователь с таким email уже существует");
+        }
     }
 
     public void deleteUser(Long id) {
