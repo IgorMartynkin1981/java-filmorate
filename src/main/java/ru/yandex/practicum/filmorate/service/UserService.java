@@ -31,7 +31,9 @@ public class UserService {
 
     public User createUser(User user) {
         createNameUserIsEmpty(user);
-        findUserDouble(user);
+        if (findUserDouble(user)) {
+
+        }
         return userDAO.createUser(user);
     }
 
@@ -81,12 +83,10 @@ public class UserService {
     }
 
 
-    private void findUserDouble(User user) {
+    private boolean findUserDouble(User user) {
         Collection<User> users = userDAO.findAll();
         Optional<User> findUserByEmail = users.stream().filter(user1 -> user1.getEmail().equals(user.getEmail())).findFirst();
-        if (findUserByEmail.isPresent()) {
-            throw new UserNotFoundException("Пользователь с таким email уже существует");
-        }
+        return findUserByEmail.isPresent();
     }
 
     public void deleteUser(Long id) {
