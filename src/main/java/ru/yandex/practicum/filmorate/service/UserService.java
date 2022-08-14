@@ -31,7 +31,7 @@ public class UserService {
 
     public User createUser(User user) {
         createNameUserIsEmpty(user);
-        findUserByEmail(user);
+        findUserDouble(user);
         return userDAO.createUser(user);
     }
 
@@ -80,11 +80,17 @@ public class UserService {
         }
     }
 
-    private void findUserByEmail(User user) {
+
+    private void findUserDouble(User user) {
         Collection<User> users = userDAO.findAll();
-        Optional<User> findUser = users.stream().filter(user1 -> user1.getEmail().equals(user.getEmail())).findFirst();
-        if (findUser.isPresent()) {
+        Optional<User> findUserByEmail = users.stream().filter(user1 -> user1.getEmail().equals(user.getEmail())).findFirst();
+        if (findUserByEmail.isPresent()) {
             throw new UserNotFoundException("Пользователь с таким email уже существует");
+        }
+
+        Optional<User> findUserByLogin = users.stream().filter(user1 -> user1.getLogin().equals(user.getLogin())).findFirst();
+        if (findUserByLogin.isPresent()) {
+            throw new UserNotFoundException("Пользователь с таким Login уже существует");
         }
     }
 
