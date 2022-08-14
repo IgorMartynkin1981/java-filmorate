@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -30,6 +31,7 @@ public class UserService {
 
     public User createUser(User user) {
         createNameUserIsEmpty(user);
+        findUserByEmail(user);
         return userDAO.createUser(user);
     }
 
@@ -75,6 +77,14 @@ public class UserService {
     private void createNameUserIsEmpty(User user) {
         if (user.getName().isBlank()) {
             user.setName(user.getLogin());
+        }
+    }
+
+    private void findUserByEmail(User user) {
+        Collection<User> users = userDAO.findAll();
+        Optional<User> findUser = users.stream().filter(user1 -> user1.getEmail().equals(user.getEmail())).findFirst();
+        if (findUser.isPresent()) {
+            throw new UserNotFoundException("Пользователь с таким email уже существует");
         }
     }
 
