@@ -21,16 +21,14 @@ public class GenreDaoImpl implements GenreDAO {
 
     @Override
     public Genre getById(Long id) {
-        String sqlQuery = "select id, name" +
-                " from genres where id = ?";
+        String sqlQuery = "SELECT id, name FROM genres WHERE id = ?";
 
         return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToGenre, id);
     }
 
     @Override
     public Collection<Genre> findAll() {
-        String sqlQuery = "SELECT id, name" +
-                " FROM genres";
+        String sqlQuery = "SELECT id, name FROM genres";
         return jdbcTemplate.query(sqlQuery, this::mapRowToGenre);
     }
 
@@ -52,8 +50,7 @@ public class GenreDaoImpl implements GenreDAO {
     }
 
     private void addFilmGenres(Long filmId, Long genresId) {
-        String sqlQuery = "INSERT INTO films_genres (film_id, genre_id) " +
-                "values (?, ?)";
+        String sqlQuery = "INSERT INTO films_genres (film_id, genre_id) VALUES (?, ?)";
 
         jdbcTemplate.update(sqlQuery, filmId, genresId);
     }
@@ -62,7 +59,7 @@ public class GenreDaoImpl implements GenreDAO {
     public List<Genre> getFilmGenres(Long filmId) {
         String sqlQuery = "SELECT g.id, g.name\n" +
                 "FROM genres AS g\n" +
-                "RIGHT JOIN films_genres as fg on g.id = fg.genre_id\n" +
+                "RIGHT JOIN films_genres AS fg ON g.id = fg.genre_id\n" +
                 "WHERE fg.film_id = ?";
         return jdbcTemplate.query(sqlQuery, this::mapRowToGenre, filmId);
     }
