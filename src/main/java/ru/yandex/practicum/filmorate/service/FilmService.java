@@ -27,15 +27,19 @@ public class FilmService {
     }
 
     public Film getFilm(Long id) {
-        if (id < 0) {
-            throw new FilmNotFoundException("id должно быть положительным");
-        }
+        findDoubleFilmByIdExeption(id);
         Film film = filmStorage.getFilm(id);
         List<Genre> genres = genreService.getFilmGenres(film.getId());
         if (genres.size() > 0) {
             film.setGenres(genres);
         }
         return film;
+    }
+
+    private static void findDoubleFilmByIdExeption(Long id) {
+        if (id < 0) {
+            throw new FilmNotFoundException("id должно быть положительным");
+        }
     }
 
     public Film create(Film film) {
@@ -55,9 +59,7 @@ public class FilmService {
     }
 
     public Film update(Film film) {
-        if (film.getId() < 0) {
-            throw new FilmNotFoundException("id фильма не может быть отрицательным");
-        }
+        findDoubleFilmByIdExeption(film.getId());
         filmStorage.updateFilm(film);
         Film updateFilm = getFilm(film.getId());
         if (film.getGenres() != null && film.getGenres().size() > 0) {

@@ -85,7 +85,9 @@ public class UserService {
 
     private void findUserDouble(User user) {
         Collection<User> users = userDAO.findAll();
-        Optional<User> findUserByEmail = users.stream().filter(user1 -> user1.getEmail().equals(user.getEmail())).findFirst();
+        Optional<User> findUserByEmail = users.stream()
+                .filter(user1 -> user1.getEmail().equals(user.getEmail()))
+                .findFirst();
         if (findUserByEmail.isPresent()) {
             throw new UserAlreadyExistException("Пользователь с таким email уже существует");
         }
