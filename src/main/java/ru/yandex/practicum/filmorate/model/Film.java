@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.validation.MinDataReleaseFilmValidation;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.List;
 
 @Data
 @Builder
@@ -24,5 +24,6 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private int duration;
-    private Set<Long> like;
+    private MPA mpa;
+    private List<Genre> genres;
 }

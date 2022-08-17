@@ -1,128 +1,114 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.FilmAlreadyExistException;
+import ru.yandex.practicum.filmorate.dao.FilmDbStorage.FilmDAO;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.FilmNotLikesException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.model.Genre;
 
-import java.util.Collection;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+
 public class FilmService {
-    private final FilmStorage filmStorage;
+    private final FilmDAO filmStorage;
     private final UserService userService;
+    private final GenreService genreService;
 
-    public Collection<Film> findAll() {
-        return filmStorage.findAll();
+    @Autowired
+    public FilmService(FilmDAO filmStorage, UserService userService, GenreService genreService) {
+        this.filmStorage = filmStorage;
+        this.userService = userService;
+        this.genreService = genreService;
     }
 
-    public Film findFilm(Long id) {
-        if (id <= 0) {
-            throw new FilmNotFoundException("Значение id не может быть меньше 0");
+    public Film getFilm(Long id) {
+        findDoubleFilmByIdExeption(id);
+        Film film = filmStorage.getFilm(id);
+        List<Genre> genres = genreService.getFilmGenres(film.getId());
+        if (genres.size() > 0) {
+            film.setGenres(genres);
         }
-        return filmStorage.findFilm(id);
+        return film;
     }
 
-    public Film createFilm(Film film) {
-        findForFilmByName(film);
-        film.setId(findMaxId());
-        return filmStorage.createFilm(film);
-    }
-
-    public Film updateFilm(Film film) {
-        if (film.getId() <= 0) {
-            throw new FilmNotFoundException("Значение id не может быть меньше 0");
-        }
-        if (findAll().stream().anyMatch(p -> p.getId().equals(film.getId()))) {
-            return filmStorage.updateFilm(film);
-        } else {
-            throw new FilmNotFoundException("Фильм в базе отсутствует");
+    private static void findDoubleFilmByIdExeption(Long id) {
+        if (id < 0) {
+            throw new FilmNotFoundException("id должно быть положительным");
         }
     }
 
-    private Long findMaxId() {
-        Long id = 1L;
-        for (Film film : filmStorage.findAll()) {
-            if (film.getId() >= id) {
-                id = film.getId() + 1;
+    public Film create(Film film) {
+        filmStorage.create(film);
+        if (film.getGenres() != null && film.getGenres().size() > 0) {
+            List<Genre> genres = new ArrayList<>();
+
+            for (int i = 0; i < film.getGenres().size(); i++) {
+                genres.add(genreService.getById(film.getGenres().get(i).getId()));
             }
+            genreService.addFilmGenres(film.getId(), genres);
+            film.setGenres(genreService.getFilmGenres(film.getId()));
         }
-        return id;
+        Film savedFilm = getFilm(film.getId());
+        log.debug("Create {}", savedFilm);
+        return film;
     }
 
-    private void findForFilmByName(Film film) {
-        if (findAll().stream().anyMatch(f -> f.getName().equals(film.getName()))) {
-            log.warn("Фильм {} уже существует", film);
-            throw new FilmAlreadyExistException();
-        }
-    }
+    public Film update(Film film) {
+        findDoubleFilmByIdExeption(film.getId());
+        filmStorage.updateFilm(film);
+        Film updateFilm = getFilm(film.getId());
+        if (film.getGenres() != null && film.getGenres().size() > 0) {
+            List<Genre> genres = new ArrayList<>();
 
-    public Film putLike(Long filmId, Long userId) {
-        if (userService.findUser(userId).getId().equals(userId) &&
-                filmStorage.findFilm(filmId).getId().equals(filmId)) {
-            Film film = findFilm(filmId);
-            Set<Long> likeId = new TreeSet<>();
-            if (film.getLike() != null) {
-                likeId.addAll(film.getLike());
+            for (int i = 0; i < film.getGenres().size(); i++) {
+                genres.add(genreService.getById(film.getGenres().get(i).getId()));
             }
-            likeId.add(userId);
-            film.setLike(likeId);
-            updateFilm(film);
-            return film;
+            genreService.addFilmGenres(updateFilm.getId(), genres);
+            updateFilm.setGenres(genreService.getFilmGenres(film.getId()));
         } else {
-            throw new FilmNotFoundException("Фильм или пользователь не существует");
+            genreService.deleteFilmGenres(updateFilm.getId());
+            updateFilm.setGenres(genreService.getFilmGenres(film.getId()));
+        }
+        log.debug("Update {}", film);
+        return updateFilm;
+    }
+
+    public List<Film> getAllFilms() {
+        List<Film> films = filmStorage.loadFilms();
+        log.debug("Load {} movies", films.size());
+        return films;
+    }
+
+    public void addRatingPoint(Long filmId, Long userId) {
+        getFilm(filmId);
+        userService.findUser(userId);
+        if (filmStorage.hasFilmRatingFromUser(filmId, userId)) {
+            log.debug("Attempt to create an existing rating point for movie #{} from user #{}", filmId, userId);
+        } else {
+            filmStorage.saveRatingPoint(filmId, userId);
+            log.debug("Creating rating point for movie #{} from user #{}", filmId, userId);
         }
     }
 
-    public Film deleteLike(Long filmId, Long userId) {
-        if (userService.findUser(userId).getId().equals(userId) &&
-                filmStorage.findFilm(filmId).getId().equals(filmId)) {
-            Film film = findFilm(filmId);
-            Set<Long> likeId = new TreeSet<>();
-            if (film.getLike() != null) {
-                likeId.addAll(film.getLike());
-            } else {
-                throw new FilmNotLikesException("У фильма нет лайков.");
-            }
-            likeId.remove(userId);
-            film.setLike(likeId);
-            updateFilm(film);
-            return film;
+    public void deleteRatingPoint(Long filmId, Long userId) {
+        getFilm(filmId);
+        userService.findUser(userId);
+        if (filmStorage.hasFilmRatingFromUser(filmId, userId)) {
+            filmStorage.deleteRatingPoint(filmId, userId);
+            log.debug("Delete rating point of movie #{} from user #{}", filmId, userId);
         } else {
-            throw new FilmNotFoundException("Фильм или пользователь не существует");
+            log.debug("Attempt to delete a non-existent rating point for movie #{} from user #{}", filmId, userId);
         }
     }
 
-    public Collection<Film> findAllByPopularity(Integer count) {
-        return findAll().stream()
-                .sorted(this::compare)
-                .limit(count)
-                .collect(Collectors.toList());
-    }
-
-    private int compare(Film f0, Film f1) {
-        int p0;
-        int p1;
-
-        if (f0.getLike() == null) {
-            p0 = 0;
-        } else {
-            p0 = f0.getLike().size();
-        }
-        if (f1.getLike() == null) {
-            p1 = 0;
-        } else {
-            p1 = f1.getLike().size();
-        }
-        return p1 - p0;
+    public List<Film> getPopular(Long count) {
+        List<Film> popular = filmStorage.loadPopularFilms(count);
+        log.debug("Return {} popular films", popular.size());
+        return popular;
     }
 }
